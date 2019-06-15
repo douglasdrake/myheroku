@@ -25,6 +25,11 @@ function buildMetadata(sample) {
 
 }
 
+/* We create a color dictionary that assigns a unique color to each otu_id.  This
+allows the colors to remain constant across bubble charts and the same colors are used 
+in the bubble chart and pie chart for the otu_id.  This allows one to compare 
+the frequency of otu_ids across samples. */
+
 function buildCharts(sample) {
   console.log("Build new chart");
 
@@ -37,10 +42,13 @@ function buildCharts(sample) {
   
       console.log(response);
       
+      // console.log(getColorScheme(response.otu_ids.slice(0,10), colorDict));
+
+      // pie chart
       let trace = {
         values: response.sample_values.slice(0, 10),
         marker: {
-          color: getColorScheme(response.otu_ids.slice(0,10), colorDict)
+          colors: getColorScheme(response.otu_ids.slice(0,10), colorDict)
         },
         labels: response.otu_ids.slice(0,10),
         hovertext: response.otu_labels.slice(0,10),
@@ -51,10 +59,10 @@ function buildCharts(sample) {
       
       let data = [trace];
       
-      //console.log(data);
-
       Plotly.newPlot("pie", data);
 
+      // Bubble chart
+      // The colors are assigned by the colorDict defined above
       var desired_maximum_marker_size = 80;
       let trace2 = {
           type: 'scatter',

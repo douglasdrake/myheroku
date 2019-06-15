@@ -3,7 +3,8 @@
   and the same color will represent the same otu_id in each chart.
   */
 
-  /* Step 1.  Determine the number of unique otu_id's. */
+  /* This first attempt didn't work... Not enough unique colors
+
 function makeColorScale() {
     let url = "/otuids";
     console.log("In makeColorScale");
@@ -19,7 +20,7 @@ function makeColorScale() {
         let myColor = d3.scaleLinear()
                         .domain([1, numberOTU])
                         .range(['white','red']);
- //                       .interpolator(d3.interpolateViridis);
+                     // .interpolator(d3.interpolateViridis);
 
         // get the colors
         let colors = response.map((d, i) => (myColor(d)));
@@ -36,24 +37,24 @@ function makeColorScale() {
     });
     return result
 }
+*/
 
-
-/* There are 3666 unique OTU_IDS - too many for a linear scaler */
-/* Would need to grab several scales and interpolate each and then join
-together. */
-
-function getColorScheme(otuIDS, colorDict) {
-    let colors = otuIDS.map((d) => colorDict[d]);
-
-    return colors
-}
+/* There are 3666 unique OTU_IDS - too many for a linear scaler from d3.  
+Neighboring colors are identical.  To get around this, we would need to
+ grab several color scales, interpolate each and then join
+together. 
+An easier solution would be to interpolate directly in the HSL scale */
 
 function newMakeColorScale() {    
-    /* 3666 = 2 * 3 * 13 * 47 */
+    /* Note: 3666 = 2 * 3 * 13 * 47 */
+
+    /* This function makes a JS object of key, value pairs with
+    colorDict[key] = an hsl color as computed below
+    The key values run from 1 to 3666 */
 
     let counter = 1;
-    let lightStart = 20;
-    let satStart = 20;
+    let lightStart = 20;  // keep away from extreme range of light scale
+    let satStart = 20;  // keep away from extreme range of saturation scale
     let hueStart = 0;
     let lightStep = (80 - 20)/6;
     let satStep = (80 - 20)/13;
@@ -79,5 +80,11 @@ function newMakeColorScale() {
     return colorDict
 }
 
+function getColorScheme(otuIDS, colorDict) {
+    /* Look up the color for each otu_id in otuIDS in the colorDict */
+    let colors = otuIDS.map((d) => colorDict[d]);
+
+    return colors
+}
 
 
