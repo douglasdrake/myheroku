@@ -36,6 +36,15 @@ def index():
     """Return the homepage."""
     return render_template("index.html")
 
+@app.route("/otuids")
+def summary():
+    """"Return a summary of the samples databse."""
+    
+    stmt = db.session.query(Samples).statement
+    df = pd.read_sql_query(stmt, db.session.bind)
+
+    return jsonify(list(df["otu_id"]))
+
 
 @app.route("/names")
 def names():
