@@ -32,10 +32,13 @@ allows the colors to remain constant across bubble charts and the same colors ar
 in the bubble chart and pie chart for the otu_id.  This allows one to compare 
 the frequency of otu_ids across samples. */
 
+// Do this once and not with every plot...
+var colorDict = newMakeColorScale();
+
 function buildCharts(sample) {
   console.log("Build new chart");
 
-  let colorDict = newMakeColorScale();
+  // let colorDict = newMakeColorScale();
   // console.log(colorDict);
 
   let url = `/samples/${sample}`;
@@ -83,7 +86,8 @@ function buildCharts(sample) {
 
       let layout = {
         hovermode: 'closest',
-        xaxis: {title: 'OTU ID'}
+        xaxis: {title: 'OTU ID'},
+        title: `OTU Profile for Sample ${sample}`
       };
 
       let data2 = [trace2];
