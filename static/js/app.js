@@ -1,16 +1,26 @@
 function buildMetadata(sample) {
   console.log("Build metadata"); 
 
-  // @TODO: Complete the following function that builds the metadata panel
+  let url = `/metadata/${sample}`;
 
-  // Use `d3.json` to fetch the metadata for a sample
-    // Use d3 to select the panel with id of `#sample-metadata`
+  d3.json(url).then(function(response){
+    
+    console.log(response);
+    let responseArray = Object.entries(response);
 
-    // Use `.html("") to clear any existing metadata
+    console.log("Clearing old panel data");
+    d3.select("#sample-metadata").html("");
 
-    // Use `Object.entries` to add each key and value pair to the panel
-    // Hint: Inside the loop, you will need to use d3 to append new
-    // tags for each key-value in the metadata.
+    console.log("Entering new panel data");
+    d3.select("#sample-metadata").selectAll("div")
+      .data(responseArray)
+      .enter()
+      .append("div")
+      .text(function(d) {
+        return `${d[0]}: ${d[1]}`
+      });
+
+  });
 
     // BONUS: Build the Gauge Chart
     // buildGauge(data.WFREQ);
@@ -19,6 +29,80 @@ function buildMetadata(sample) {
 function buildCharts(sample) {
   console.log("Build new chart");
 
+  let url = `/samples/${sample}`;
+
+  d3.json(url).then(function(response) {
+  
+      console.log(response);
+      
+      let trace = {
+        values: response.sample_values.slice(0, 10),
+        labels: response.otu_ids.slice(0,10),
+        hovertext: response.otu_labels.slice(0,10),
+        hoverinfo: 'text', // default value is 'all' which incluces 'label + text + value'
+        // text: response.otu_labels.slice(0,10),
+        type: 'pie'
+      };
+      
+      let data = [trace];
+      
+      console.log(data);
+
+      Plotly.newPlot("pie", data);
+
+      let desired_maximum_marker_size = 40;
+      let trace2 = {
+          type: 'scatter',
+          x: response.otu_ids,
+          y: response.sample_values,
+          hovertext: response.otu_labels,
+          mode: 'markers',
+          // hoverinfo: 'x+y+text',
+          marker: {
+            color: response.otu_ids,
+            size: response.sample_values,
+            sizemode: 'area',
+            sizeref: 2.0 * Math.max(...response.sample_values) / (desired_maximum_marker_size**2),
+          }
+      };
+
+      let layout = {
+        xaxis: {title: 'OTU ID'}
+      };
+
+      let data2 = [trace2];
+
+      Plotly.newPlot("bubble", data2, layout);
+
+      /*var trace = {
+        type: "scatter",
+        mode: "lines",
+        name: "Bigfoot Sightings",
+        x: response.map(data => data.year),
+        y: response.map(data => data.sightings),
+        line: {
+          color: "#17BECF"
+        }
+      }; */
+  
+      /*
+      var data = [trace];
+  
+      var layout = {
+        title: "Bigfoot Sightings Per Year",
+        xaxis: {
+          type: "date"
+        },
+        yaxis: {
+          autorange: true,
+          type: "linear"
+        }
+      };
+  
+      Plotly.newPlot("plot", data, layout);
+      */
+
+    });
   // @TODO: Use `d3.json` to fetch the sample data for the plots
 
     // @TODO: Build a Bubble Chart using the sample data
