@@ -1,4 +1,3 @@
-/* Homework 15 Douglas Drake */
 
 function buildMetadata(sample) {
   console.log("Build metadata"); 
