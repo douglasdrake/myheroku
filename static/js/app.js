@@ -1,11 +1,10 @@
-
 function buildMetadata(sample) {
-  console.log("Build metadata"); 
+  console.log("Build metadata");
 
   let url = `/metadata/${sample}`;
 
-  d3.json(url).then(function(response){
-    
+  d3.json(url).then(function (response) {
+
     console.log(response);
     let responseArray = Object.entries(response);
 
@@ -17,7 +16,7 @@ function buildMetadata(sample) {
       .data(responseArray)
       .enter()
       .append("div")
-      .text(function(d) {
+      .text(function (d) {
         return `${d[0]}: ${d[1]}`
       });
 
@@ -42,58 +41,60 @@ function buildCharts(sample) {
 
   let url = `/samples/${sample}`;
 
-  d3.json(url).then(function(response) {
-  
-      console.log(response);
-      
-      // console.log(getColorScheme(response.otu_ids.slice(0,10), colorDict));
+  d3.json(url).then(function (response) {
 
-      // pie chart
-      let trace = {
-        values: response.sample_values.slice(0, 10),
-        marker: {
-          colors: getColorScheme(response.otu_ids.slice(0,10), colorDict)
-        },
-        labels: response.otu_ids.slice(0,10),
-        hovertext: response.otu_labels.slice(0,10),
-        hoverinfo: 'text', // default value is 'all' which incluces 'label + text + value'
-        // text: response.otu_labels.slice(0,10),
-        type: 'pie'
-      };
-      
-      let data = [trace];
-      
-      Plotly.newPlot("pie", data);
+    console.log(response);
 
-      // Bubble chart
-      // The colors are assigned by the colorDict defined above
-      var desired_maximum_marker_size = 80;
-      let trace2 = {
-          type: 'scatter',
-          x: response.otu_ids,
-          y: response.sample_values,
-          text: response.otu_labels,
-          mode: 'markers',
-          hoverinfo: "x + y + text",
-          marker: {
-            color: getColorScheme(response.otu_ids, colorDict),
-            size: response.sample_values,
-            sizeref: 2.0 * Math.max(...response.sample_values) / (desired_maximum_marker_size**2),
-            sizemode: 'area'
-          }
-      };
+    // console.log(getColorScheme(response.otu_ids.slice(0,10), colorDict));
 
-      let layout = {
-        hovermode: 'closest',
-        xaxis: {title: 'OTU ID'},
-        title: `OTU Profile for Sample ${sample}`
-      };
+    // pie chart
+    let trace = {
+      values: response.sample_values.slice(0, 10),
+      marker: {
+        colors: getColorScheme(response.otu_ids.slice(0, 10), colorDict)
+      },
+      labels: response.otu_ids.slice(0, 10),
+      hovertext: response.otu_labels.slice(0, 10),
+      hoverinfo: 'text', // default value is 'all' which incluces 'label + text + value'
+      // text: response.otu_labels.slice(0,10),
+      type: 'pie'
+    };
 
-      let data2 = [trace2];
+    let data = [trace];
 
-      Plotly.newPlot("bubble", data2, layout);
+    Plotly.newPlot("pie", data);
 
-    });
+    // Bubble chart
+    // The colors are assigned by the colorDict defined above
+    var desired_maximum_marker_size = 80;
+    let trace2 = {
+      type: 'scatter',
+      x: response.otu_ids,
+      y: response.sample_values,
+      text: response.otu_labels,
+      mode: 'markers',
+      hoverinfo: "x + y + text",
+      marker: {
+        color: getColorScheme(response.otu_ids, colorDict),
+        size: response.sample_values,
+        sizeref: 2.0 * Math.max(...response.sample_values) / (desired_maximum_marker_size ** 2),
+        sizemode: 'area'
+      }
+    };
+
+    let layout = {
+      hovermode: 'closest',
+      xaxis: {
+        title: 'OTU ID'
+      },
+      title: `OTU Profile for Sample ${sample}`
+    };
+
+    let data2 = [trace2];
+
+    Plotly.newPlot("bubble", data2, layout);
+
+  });
 }
 
 function init() {
