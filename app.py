@@ -2,17 +2,17 @@ import os
 
 import pandas as pd
 import numpy as np
+#import sqlite3
 
 import sqlalchemy
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
 
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, render_template, g
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
-
 
 #################################################
 # Database Setup
@@ -20,6 +20,32 @@ app = Flask(__name__)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db/bellybutton.sqlite"
 db = SQLAlchemy(app)
+
+#if not os.path.exists('db/bellybutton.sqlite'):
+#    print("Can't find database?")
+#else:
+#    print("Database is accessible")
+
+#print(db)
+
+#DATABASE = 'db/bellybutton.sqlite'
+
+#def get_db():
+#    db2 = getattr(g, '_database', None)
+#    if db2 is None:
+#        db2 = g._database = sqlite3.connect(DATABASE)
+#    return db2
+
+#print("trying to open and close directly with sqlite3")
+#with app.app_context():
+#    my_connection = get_db()
+#my_connection.close()
+
+print("prior to context...")
+with app.app_context():
+    print("prior to opening db...")
+    db.create_all()
+    print("with context...")
 
 # reflect an existing database into a new model
 Base = automap_base()
@@ -111,4 +137,5 @@ def samples(sample):
 
 
 if __name__ == "__main__":
+    #with app.app_context():
     app.run()
