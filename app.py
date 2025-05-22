@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
 
 from flask import Flask, jsonify, render_template, g
-from flask_sqlalchemy import SQLAlchemy
+#from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 
@@ -18,39 +18,21 @@ app = Flask(__name__)
 # Database Setup
 #################################################
 
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db/bellybutton.sqlite"
-db = SQLAlchemy(app)
+#app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db/bellybutton.sqlite"
+#db = SQLAlchemy(app)
 
-#if not os.path.exists('db/bellybutton.sqlite'):
-#    print("Can't find database?")
-#else:
-#    print("Database is accessible")
+DATABASE = 'sqlite:///db/bellybutton.sqlite'
 
-#print(db)
-
-#DATABASE = 'db/bellybutton.sqlite'
-
-#def get_db():
-#    db2 = getattr(g, '_database', None)
-#    if db2 is None:
-#        db2 = g._database = sqlite3.connect(DATABASE)
-#    return db2
-
-#print("trying to open and close directly with sqlite3")
-#with app.app_context():
-#    my_connection = get_db()
-#my_connection.close()
-
-print("prior to context...")
 with app.app_context():
-    print("prior to opening db...")
-    db.create_all()
-    print("with context...")
+    engine = create_engine(DATABASE)
+    conn = engine.connect()
+    session = Session(engine)
 
 # reflect an existing database into a new model
 Base = automap_base()
+
 # reflect the tables
-Base.prepare(db.engine, reflect=True)
+Base.prepare(autoload_with=engine, reflect=True)
 
 # Save references to each table
 Samples_Metadata = Base.classes.sample_metadata
@@ -66,8 +48,8 @@ def index():
 def summary():
     """"Return a summary of the samples databse."""
     
-    stmt = db.session.query(Samples).statement
-    df = pd.read_sql_query(stmt, db.session.bind)
+    stmt = session.query(Samples).statement
+    df = pd.read_sql_query(stmt, session.bind)
 
     return jsonify(list(df["otu_id"]))
 
@@ -77,8 +59,8 @@ def names():
     """Return a list of sample names."""
 
     # Use Pandas to perform the sql query
-    stmt = db.session.query(Samples).statement
-    df = pd.read_sql_query(stmt, db.session.bind)
+    stmt = session.query(Samples).statement
+    df = pd.read_sql_query(stmt, session.bind)
 
     # Return a list of the column names (sample names)
     return jsonify(list(df.columns)[2:])
@@ -97,7 +79,7 @@ def sample_metadata(sample):
         Samples_Metadata.WFREQ,
     ]
 
-    results = db.session.query(*sel).filter(Samples_Metadata.sample == sample).all()
+    results = session.query(*sel).filter(Samples_Metadata.sample == sample).all()
 
     # Create a dictionary entry for each row of metadata information
     sample_metadata = {}
@@ -117,8 +99,8 @@ def sample_metadata(sample):
 @app.route("/samples/<sample>")
 def samples(sample):
     """Return `otu_ids`, `otu_labels`,and `sample_values`."""
-    stmt = db.session.query(Samples).statement
-    df = pd.read_sql_query(stmt, db.session.bind)
+    stmt = session.query(Samples).statement
+    df = pd.read_sql_query(stmt, session.bind)
 
     # Filter the data based on the sample number and
     # only keep rows with values above 1
